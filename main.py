@@ -2,7 +2,6 @@
 
 from os import listdir, getcwd
 import random
-import os.path as osp
 
 import pygame
 from pygame.locals import *
