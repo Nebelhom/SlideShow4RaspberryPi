@@ -6,6 +6,8 @@ import random
 import pygame
 from pygame.locals import *
 
+import helper_func as hf
+
 pygame.init()
 
 FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'pcx', 'tga', 'tif', 'lbm',
@@ -17,67 +19,21 @@ infoObject = pygame.display.Info()
 SCREEN_RES = (infoObject.current_w, infoObject.current_h)
 
 
-def list_img_paths(cpath):
-    """
-    Lists all image filenames in the path directory, p.
-    curpath: String: Correctly formatted path according to platform
-    Returns:
-    List of strings of image filenames.
-    """
-
-    return [i for i in listdir(cpath) if i.split('.')[-1].lower() in FORMATS]
-
-
-def aspect_scale(img, resolution):
-    """
-    Scales 'img' to fit into box bx/by. This method will retain the original
-    image's aspect ratio.
-    Reference: http://www.pygame.org/pcr/transform_scale/
-
-    img: Pygame Surface Object: Image loaded into Pygame
-    resolution: tuple of integers: The resolution of the display
-
-    Returns:
-    Pygame Surface Object: Rescaled to fit the surface according to its aspect
-    ratio.
-    """
-
-    bx, by = resolution
-    ix, iy = img.get_size()
-    if ix > iy:
-        # fit to width
-        scale_factor = bx / float(ix)
-        sy = int(scale_factor * iy)
-        if sy > by:
-            scale_factor = by / float(iy)
-            sx = int(scale_factor * ix)
-            sy = by
-        else:
-            sx = bx
-    else:
-        # fit to height
-        scale_factor = by / float(iy)
-        sx = int(scale_factor * ix)
-        if sx > bx:
-            scale_factor = bx / float(ix)
-            sx = bx
-            sy = int(scale_factor * iy)
-        else:
-            sy = by
-
-    return pygame.transform.scale(img, (sx, sy))
-
-
 class SlideShow:
     """
     Write proper documentation!!!
     Runs slideshow using pygame
     """
 
-    def __init__(self, imgpath=getcwd()):
-        self.imgsrc = list_img_paths(imgpath)
-        self.img = random.choice(self.imgsrc)
-        self.imgpath = imgpath
+    def __init__(self, time_delay=3000, path2imgs=getcwd()):
+        # Sorting out the images
+        self.imgsrc = hf.list_img_paths(path2imgs)
+        self.imgpath = random.choice(self.imgsrc)
+        # will be populated as pygame.Surface in run method
+        self.img = None
+
+
+        self.time_delay = time_delay
 
 
     def run(self):
@@ -91,7 +47,7 @@ class SlideShow:
         * The sleep function for Raspberry and wake up
         """
 
-        img = pygame.image.load(self.img)
+        self.img = pygame.image.load(self.imgpath)
         black = (0, 0, 0)
 
         # Chooses the size of your display
@@ -103,15 +59,16 @@ class SlideShow:
         running = True
 
         while running:
-            new_img = random.choice(self.imgsrc)
-
-            screen.fill((white))
-
-            screen.blit(img, (0, 0))
-            self.img = pygame.image.load(new_img)
+            self.imgpath = random.choice(self.imgsrc)
+            screen.fill((black))
+            screen.blit(self.img, (0, 0))
+            self.img = pygame.image.load(self.imgpath)
             screen.fill(black)
-            screen.blit(aspect_scale(self.img, SCREEN_RES), (0, 0))
-            pygame.time.delay(3000)
+
+            # get the new dimensions for the image
+            new_dim = hf.aspect_scale(self.img.get_size(), SCREEN_RES)
+            screen.blit(pygame.transform.scale(self.img, new_dim), (0, 0))
+            pygame.time.delay(self.time_delay)
             pygame.display.flip()
 
             # event handling, gets all event from the event queue
