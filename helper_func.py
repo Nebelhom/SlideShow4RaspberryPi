@@ -61,3 +61,16 @@ def aspect_scale(img_dim, resolution):
             sy = by
 
     return (sx, sy)
+
+
+def center_img(img_dim, resolution):
+    """
+    Returns coordinates that centers img on surface
+    """
+    iw, ih = img_dim
+    rw, rh = resolution
+
+    w = int((rw - iw) / 2)
+    h = int((rh - ih) / 2)
+
+    return (w, h)

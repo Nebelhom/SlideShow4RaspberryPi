@@ -32,7 +32,7 @@ class SlideShow:
         # will be populated as pygame.Surface in run method
         self.img = None
 
-
+        # Defines how much time passes between image switch
         self.time_delay = time_delay
 
 
@@ -47,27 +47,27 @@ class SlideShow:
         * The sleep function for Raspberry and wake up
         """
 
-        self.img = pygame.image.load(self.imgpath)
         black = (0, 0, 0)
 
         # Chooses the size of your display
         # Makes it portable to varying screens
         size = (0, 0)
         screen = pygame.display.set_mode(size, FULLSCREEN)
-        screen.fill(black)
 
         running = True
 
         while running:
             self.imgpath = random.choice(self.imgsrc)
-            screen.fill((black))
-            screen.blit(self.img, (0, 0))
             self.img = pygame.image.load(self.imgpath)
-            screen.fill(black)
 
-            # get the new dimensions for the image
+            # Scale the image according to screen resolution
             new_dim = hf.aspect_scale(self.img.get_size(), SCREEN_RES)
-            screen.blit(pygame.transform.scale(self.img, new_dim), (0, 0))
+            self.img = pygame.transform.scale(self.img, new_dim)
+            # get the coordinates to center image
+            centre_coord = hf.center_img(self.img.get_size(), SCREEN_RES)
+
+            screen.fill(black)
+            screen.blit(self.img, centre_coord)
             pygame.time.delay(self.time_delay)
             pygame.display.flip()
 
