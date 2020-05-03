@@ -71,21 +71,15 @@ class SlideShow:
 
         while running:
             if self.time2switch:
-                ## TODO
-                ## Look at repeating timers
-                ## Currently creating a new thread each time...
-                ## Not sure if the numbering will become an issue...
-
 
                 # Changes the image
                 self.change_image()
 
                 # Creates new Timer thread
-                # (Reminder: Cannot restart the same thread)
+                # Reminder: Cannot restart the same thread
                 self.time2switch = False
                 timer = th.Timer(self.time_delay, self.signal_switch_image)
                 timer.start()
-                print(th.enumerate())
 
             self.img = pygame.image.load(self.imgpath)
 
