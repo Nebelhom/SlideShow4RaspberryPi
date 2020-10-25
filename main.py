@@ -1,6 +1,6 @@
 #!usr/bin/env python
 
-from os import listdir, getcwd
+from os import getcwd
 import random
 import threading as th
 
@@ -92,7 +92,6 @@ class SlideShow:
             screen.fill(BLACK)
             screen.blit(self.img, centre_coord)
             pygame.display.flip()
-
 
             # event handling, gets all event from the event queue
             for event in pygame.event.get():
