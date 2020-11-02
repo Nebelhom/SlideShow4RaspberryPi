@@ -27,7 +27,9 @@ class SlideShow:
     Runs slideshow using pygame
     """
 
-    def __init__(self, time_delay=3, path2imgs=getcwd()):
+    def __init__(self, time_delay=3, orientation="landscape",
+                 path2imgs=getcwd()):
+
         # Sorting out the images
         self.imgsrc = hf.list_img_paths(path2imgs)
         self.imgpath = random.choice(self.imgsrc)
@@ -38,12 +40,87 @@ class SlideShow:
         self.time_delay = time_delay
         self.time2switch = True
 
+        # Check the desired image orientation
+        self.orientation = orientation
+
     def change_image(self):
         """
         Updates the path to picture.
         """
 
         self.imgpath = random.choice(self.imgsrc)
+
+    def rotate_image(self):
+        """
+        Rotates the image according to its original orientation
+        to fit the screen.
+        Original orientation is obtained using EXIF data using the
+        Pillow library (see helper.func.py)
+        Depending on screen orientation, you can choose either landscape
+        or portrait.
+        The function with rotate accordingly.
+
+        Reference:
+        https://www.daveperrett.com/articles/2012/07/28/exif-orientation-handling-is-a-ghetto/
+
+
+        Anything but 1 and 6 are untested as I have not had any images like that.
+        If there is an issue, please contact me and send me an example image.
+        """
+
+        o = hf.get_img_orientation(self.imgpath)
+
+        if self.orientation == "landscape":
+            # This is landscape orientation
+            if o == 1:
+                pass
+            elif o == 2:
+                self.img = pygame.transform.flip(self.img, True, False)
+            elif o == 3:
+                self.img = pygame.transform.rotate(self.img, -180)
+            elif o == 4:
+                self.img = pygame.transform.flip(self.img, False, True)
+            elif o == 5:
+                self.img = pygame.transform.flip(self.img, True, False)
+                self.img = pygame.transform.rotate(self.img, -90)
+            elif o == 6:
+                self.img = pygame.transform.rotate(self.img, -90)
+            elif o == 7:
+                self.img = pygame.transform.flip(self.img, True, False)
+                self.img = pygame.transform.rotate(self.img, 90)
+            elif o == 8:
+                self.img = pygame.transform.rotate(self.img, 90)
+            else:
+                print("No valid image orientation value in the EXIF.\
+                 Use as is.")
+
+        elif self.orientation == "portrait":
+            if o == 1:
+                self.img = pygame.transform.rotate(self.img, 90)
+            elif o == 2:
+                self.img = pygame.transform.flip(self.img, True, False)
+                self.img = pygame.transform.rotate(self.img, 90)
+            elif o == 3:
+                self.img = pygame.transform.rotate(self.img, 90)
+            elif o == 4:
+                self.img = pygame.transform.flip(self.img, True, False)
+                self.img = pygame.transform.rotate(self.img, -90)
+            elif o == 5:
+                self.img = pygame.transform.flip(self.img, True, False)
+            # This is portrait orientation
+            elif o == 6:
+                pass
+            elif o == 7:
+                self.img = pygame.transform.flip(self.img, False, True)
+            elif o == 8:
+                self.img = pygame.transform.rotate(self.img, -180)
+            else:
+                print("No valid image orientation value in the EXIF.\
+                 Use as is.")
+        else:
+            raise SyntaxError("No valid image orientation was given. Did you\
+             check spelling?")
+
 
     def signal_switch_image(self):
         """
@@ -82,6 +159,7 @@ class SlideShow:
                 timer.start()
 
             self.img = pygame.image.load(self.imgpath)
+            self.rotate_image()
 
             # Scale the image according to screen resolution
             new_dim = hf.aspect_scale(self.img.get_size(), SCREEN_RES)
