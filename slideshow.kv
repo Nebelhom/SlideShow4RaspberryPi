@@ -1,0 +1,13 @@
+#:kivy 2.0.0
+<Picture>:
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.angle
+            origin: self.center
+    canvas.after:
+        PopMatrix
+
+<RootWidget>:
+    orientation: 'vertical'
+    Picture:
