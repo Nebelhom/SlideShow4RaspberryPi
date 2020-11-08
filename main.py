@@ -76,8 +76,6 @@ class Picture(Image):
         """
         self.source = random.choice(self.imgs)
         self.set_angle()
-        print("angle is ", self.angle)
-
 
     def set_angle(self):
         """
