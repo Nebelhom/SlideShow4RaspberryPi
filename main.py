@@ -5,6 +5,7 @@ kivy.require('2.0.0')
 
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.properties import NumericProperty
 from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
@@ -33,6 +34,8 @@ Take into account and search for it "How to have Menu and Game in the
 same menu" type query.
 """
 
+Window.fullscreen = True
+
 
 class RootWidget(BoxLayout):
     """
@@ -41,6 +44,39 @@ class RootWidget(BoxLayout):
 
     def __init__(self, **kwargs):
         super(RootWidget, self).__init__(**kwargs)
+
+        self.scheduled_event = None
+
+    def on_touch_down(self, touch):
+
+        if self.scheduled_event is not None:
+            self.scheduled_event.cancel()
+            self.scheduled_event = None
+        if touch.is_double_tap:
+            self.fullscreen_toggle()
+        else:
+            # 0.5 seems to be the right balance between response time and
+            # ability to click fast enough. May differ on touchscreen
+            double_tap_wait_s = 0.5
+            self.scheduled_event = Clock.schedule_once(self.single_tap,
+                                                       double_tap_wait_s)
+
+    def single_tap(self, *args):
+        """
+        Placeholder function for when I need a single tap
+        Planned is to open the menu
+        """
+        print("Single Tap!")
+
+    def fullscreen_toggle(self):
+        """
+        Aspect Ratio is wrong at this moment. Try this link next
+        https://stackoverflow.com/questions/28712359/how-to-fix-aspect-ratio-of-a-kivy-game
+        """
+        if Window.fullscreen:
+            Window.fullscreen = False
+        else:
+            Window.fullscreen = True
 
 
 class Picture(Image):
