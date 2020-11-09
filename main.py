@@ -34,7 +34,8 @@ Take into account and search for it "How to have Menu and Game in the
 same menu" type query.
 """
 
-Window.fullscreen = True
+# Automagically sets image to maximum resolution
+Window.fullscreen = 'auto'
 
 
 class RootWidget(BoxLayout):
@@ -48,7 +49,12 @@ class RootWidget(BoxLayout):
         self.scheduled_event = None
 
     def on_touch_down(self, touch):
+        """
+        Description
+        """
 
+        # Reference:
+        # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
         if self.scheduled_event is not None:
             self.scheduled_event.cancel()
             self.scheduled_event = None
@@ -76,7 +82,7 @@ class RootWidget(BoxLayout):
         if Window.fullscreen:
             Window.fullscreen = False
         else:
-            Window.fullscreen = True
+            Window.fullscreen = 'auto'
 
 
 class Picture(Image):
@@ -110,6 +116,7 @@ class Picture(Image):
         """
         Updates the path to picture.
         """
+
         self.source = random.choice(self.imgs)
         self.set_angle()
 
