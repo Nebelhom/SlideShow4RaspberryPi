@@ -121,10 +121,19 @@ def get_img_orientation(fname):
         }
     return exif["Orientation"]
 
+def get_img_size(fname):
+    """
+    Returns image size using Pillow
+    """
+
+    with Image.open(fname) as img:
+        width, height = img.size
+    return width, height
 
 if __name__ == "__main__":
     #get_img_orientation("20190330_134242.jpg")
     #print("\n\n#############################\n\n")
     #get_img_orientation("20200511_184914.jpg")
-    print("Landscape: ", get_img_orientation("20190330_134242.jpg"))
-    print("Portrait: ", get_img_orientation("20200511_184914.jpg"))
+    #print("Landscape: ", get_img_orientation("20190330_134242.jpg"))
+    #print("Portrait: ", get_img_orientation("20200511_184914.jpg"))
+    print("Image size ", get_img_size("20200511_184914.jpg"))
