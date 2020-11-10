@@ -20,42 +20,43 @@ import helper_func as hf
 
 """
 TODO:
-Work on rotation of images. This is not trivial in kivy.
-apparently need to use PushMatrix and PopMatrix.
-
-Moving widget layout into kv stops this code from working.
-
-Frustrating! Ideally try to move to kv language first and
-then work on it.
-
 RootWidget should be able to house both a menu and the slideshow.
 
 Take into account and search for it "How to have Menu and Game in the
 same menu" type query.
 """
 
-# Automagically sets image to maximum resolution
+# Automagically sets image to maximum resolution and Window to fullscreen
 Window.fullscreen = 'auto'
 
 
 class RootWidget(BoxLayout):
-    """
-    Description
+    """RootWidget is the base Widget of this application.
+
+    :param scheduled_event: 
+    :type scheduled_event: None or kivy.clock.ClockEvent
     """
 
     def __init__(self, **kwargs):
+        """Constructor method
+        """
         super(RootWidget, self).__init__(**kwargs)
 
         self.scheduled_event = None
 
     def on_touch_down(self, touch):
-        """
-        Description
+        """Kivy standard function to capture a touch event and to link
+           it to a method
+
+        :param touch: a touch or click event with the screen
+        :type touch: kivy.input.providers.mouse.MouseMotionEvent
         """
 
         # Reference:
         # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
+        print(type(touch))
         if self.scheduled_event is not None:
+            print(type(self.scheduled_event))
             self.scheduled_event.cancel()
             self.scheduled_event = None
         if touch.is_double_tap:
@@ -75,13 +76,12 @@ class RootWidget(BoxLayout):
         print("Single Tap!")
 
     def fullscreen_toggle(self):
-        """
-        Aspect Ratio is wrong at this moment. Try this link next
-        https://stackoverflow.com/questions/28712359/how-to-fix-aspect-ratio-of-a-kivy-game
+        """Toggles between fullscreen and windowed mode.
         """
         if Window.fullscreen:
             Window.fullscreen = False
         else:
+            # If set to true, the images will not have optimal resolution
             Window.fullscreen = 'auto'
 
 

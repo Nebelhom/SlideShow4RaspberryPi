@@ -16,28 +16,31 @@ FORMATS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'pcx', 'tga', 'tif', 'lbm',
 
 
 def list_img_paths(cpath):
-    """
-    Lists all image filenames in the path directory, p.
-    curpath: String: Correctly formatted path according to platform
-    Returns:
-    List of strings of image filenames.
+    """Lists all image filenames in the path directory.
+
+    :param cpath: Directory path to images
+    :type cpath: str
+
+    :return: List of strings of image filenames
+    :rtype: list
     """
 
     return [i for i in listdir(cpath) if i.split('.')[-1].lower() in FORMATS]
 
 
 def aspect_scale(img_dim, resolution):
-    """
-    Scales 'img_dim' tuple to fit into resolution tuple. This method will
-    retain the original image's aspect ratio.
+    """Takes the image dimensions and scales it to the given resolution.
+
+    This method will retain the original image's aspect ratio.
     Reference: http://www.pygame.org/pcr/transform_scale/
 
-    img_dim: tuple of integers: dimensions of an image
-    resolution: tuple of integers: The resolution of the display
+    :param img_dim: Dimensions of an image
+    :type img_dim: (int, int)
+    :param resolution: The resolution of the display
+    :type resolution: (int, int)
 
-    Returns:
-    tuple of integers: Rescaled dimensions to fit the resolution according
-    to its aspect ratio.
+    :return: Rescaled dimensions to fit the resolution according to its aspect ratio.
+    :rtype: (int, int)
     """
 
     bx, by = resolution
@@ -67,8 +70,15 @@ def aspect_scale(img_dim, resolution):
 
 
 def center_img(img_dim, resolution):
-    """
-    Returns coordinates that centers img on surface
+    """Returns the coordinates that centers the image on the surface.
+
+    :param img_dim: Dimensions of an image
+    :type img_dim: (int, int)
+    :param resolution: The resolution of the display
+    :type resolution: (int, int)
+
+    :return: The coordinates that centers the image on the surface.
+    :rtype: (int, int)
     """
     iw, ih = img_dim
     rw, rh = resolution
@@ -80,13 +90,17 @@ def center_img(img_dim, resolution):
 
 
 def print_img_exif(fname):
-    """
-    Prints a dict of Exif values from an image.
-    Used to visualise the values
+    """Prints a dict of Exif values from an image using Pillow library
+
+    Auxiliary function used to visualise the values for troubleshooting
+    purposes.
 
     References:
     https://hhsprings.bitbucket.io/docs/programming/examples/python/PIL/ExifTags.html
     https://www.daveperrett.com/articles/2012/07/28/exif-orientation-handling-is-a-ghetto/
+
+    :param fname: The path and filename to an image file
+    :type fname: str
     """
 
     with Image.open(fname) as img:
@@ -110,8 +124,13 @@ def print_img_exif(fname):
             print(key, ": ", val)
 
 def get_img_orientation(fname):
-    """
-    Returns image orientation using Pillow
+    """Returns the image orientation from the exif data using Pillow
+
+    :param fname: The path and filename to an image file
+    :type fname: str
+
+    :return: Returns int value associated with orientation in exif data
+    :rtype: int
     """
     with Image.open(fname) as img:
         exif = {
@@ -122,8 +141,13 @@ def get_img_orientation(fname):
     return exif["Orientation"]
 
 def get_img_size(fname):
-    """
-    Returns image size using Pillow
+    """Returns image size of an image using the Pillow library
+
+    :param fname: The path and filename to an image file
+    :type fname: str
+
+    :return: width and height associated with the size dimensions of an image
+    :rtype: (int, int)
     """
 
     with Image.open(fname) as img:
@@ -135,5 +159,5 @@ if __name__ == "__main__":
     #print("\n\n#############################\n\n")
     #get_img_orientation("20200511_184914.jpg")
     #print("Landscape: ", get_img_orientation("20190330_134242.jpg"))
-    #print("Portrait: ", get_img_orientation("20200511_184914.jpg"))
-    print("Image size ", get_img_size("20200511_184914.jpg"))
+    print("Portrait: ", type(get_img_orientation("20200511_184914.jpg")))
+    #print("Image size ", get_img_size("20200511_184914.jpg"))
