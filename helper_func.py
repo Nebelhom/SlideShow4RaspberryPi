@@ -80,6 +80,7 @@ def center_img(img_dim, resolution):
     :return: The coordinates that centers the image on the surface.
     :rtype: (int, int)
     """
+    
     iw, ih = img_dim
     rw, rh = resolution
 
@@ -132,6 +133,7 @@ def get_img_orientation(fname):
     :return: Returns int value associated with orientation in exif data
     :rtype: int
     """
+
     with Image.open(fname) as img:
         exif = {
             TAGS[k]: v
