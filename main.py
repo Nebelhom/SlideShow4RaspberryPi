@@ -20,42 +20,44 @@ import helper_func as hf
 
 """
 TODO:
-Work on rotation of images. This is not trivial in kivy.
-apparently need to use PushMatrix and PopMatrix.
-
-Moving widget layout into kv stops this code from working.
-
-Frustrating! Ideally try to move to kv language first and
-then work on it.
-
 RootWidget should be able to house both a menu and the slideshow.
 
 Take into account and search for it "How to have Menu and Game in the
 same menu" type query.
 """
 
-# Automagically sets image to maximum resolution
+# Automagically sets image to maximum resolution and Window to fullscreen
 Window.fullscreen = 'auto'
 
 
 class RootWidget(BoxLayout):
-    """
-    Description
+    """RootWidget is the base Widget of this application.
+
+    :param scheduled_event: Shows whether an event is scheduled in kivy or not
+    :type scheduled_event: None or kivy.clock.ClockEvent
     """
 
     def __init__(self, **kwargs):
+        """Constructor method
+        """
+
         super(RootWidget, self).__init__(**kwargs)
 
         self.scheduled_event = None
 
     def on_touch_down(self, touch):
-        """
-        Description
+        """Kivy standard function to capture a touch event and to link
+           it to a method
+
+        :param touch: a touch or click event with the screen
+        :type touch: kivy.input.providers.mouse.MouseMotionEvent
         """
 
         # Reference:
         # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
+        print(type(touch))
         if self.scheduled_event is not None:
+            print(type(self.scheduled_event))
             self.scheduled_event.cancel()
             self.scheduled_event = None
         if touch.is_double_tap:
@@ -72,29 +74,48 @@ class RootWidget(BoxLayout):
         Placeholder function for when I need a single tap
         Planned is to open the menu
         """
+
         print("Single Tap!")
 
     def fullscreen_toggle(self):
+        """Toggles between fullscreen and windowed mode.
         """
-        Aspect Ratio is wrong at this moment. Try this link next
-        https://stackoverflow.com/questions/28712359/how-to-fix-aspect-ratio-of-a-kivy-game
-        """
+
         if Window.fullscreen:
             Window.fullscreen = False
         else:
+            # If set to true, the images will not have optimal resolution
             Window.fullscreen = 'auto'
 
 
 class Picture(Image):
+    """Key class extending the existing kivy.uix.image Image class to be used
+    in the slide show.
+    
+    :param angle: The angle of image rotation in relation to the image's exif
+                  orientation
+    :type angle: int
+    :param time_delay: The time in seconds until the image shown is switched
+    :type time_delay: int
+    :param __frame_orientation: Defines if the screen is in 'landscape'
+        or 'portrait' orientation, defaults to 'landscape'
+    :type __frame_orientation: str
+    :param imgs: A list of all paths to relevant image files in the chosen
+        image directory
+    :type imgs: list
+    :param source: The path to the currently chosen image
+    :type source: str
     """
-    Description tbd
-    """
+
     # Without this declaration, the value will not arrive in kv file
     # called as self.angle in the code below
     angle = NumericProperty(0)
 
     def __init__(self, path2imgs=os.getcwd(), time_delay=3,
                  frame_orientation='landscape', *args, **kwargs):
+        """Constructor method
+        """
+
         super(Picture, self).__init__(*args, **kwargs)
 
         # Defines how much time passes between image switch
@@ -113,8 +134,9 @@ class Picture(Image):
         Clock.schedule_interval(self.change_image, self.time_delay)
 
     def change_image(self, *args):
-        """
-        Updates the path to picture.
+        """Updates the path to image.
+
+        NOTE: *args added to fit with Clock.schedule_interval call
         """
 
         self.source = random.choice(self.imgs)
@@ -122,24 +144,25 @@ class Picture(Image):
 
     def set_angle(self):
         """
-        Rotates the image according to its original orientation
-        to fit the screen.
+        Rotates the image according to its original orientation to fit the
+        screen.
+        
         Original orientation is obtained using EXIF data using the
-        Pillow library (see helper.func.py)
-        Depending on screen orientation, you can choose either landscape
-        or portrait.
-        The function with rotate accordingly.
+        Pillow library (see helper.func.py). Depending on screen orientation,
+        you can choose either landscape or portrait. The function with rotate
+        accordingly.
+
+        Anything but 1 and 6 are untested as I have not had any images like
+        that.
+
+        Currently, flipping images is not supported. In landscape that would be
+        EXIF values 2, 4, 5 and 7. If there is an issue, please contact me and
+        send me an example image.
 
         Reference:
         https://www.daveperrett.com/articles/2012/07/28/exif-orientation-handling-is-a-ghetto/
 
-        Anything but 1 and 6 are untested as I have not had any images like that.
 
-        Currently, flipping images is not supported as kivy makes it unnecessarily
-        difficult to do so for little gain
-        In landscape that would be EXIF value 2, 4, 5 and 7
-
-        If there is an issue, please contact me and send me an example image.
         """
         o = hf.get_img_orientation(self.source)
         if self.__frame_orientation == "landscape":
@@ -171,10 +194,12 @@ class Picture(Image):
                  Use as is.")
         else:
             raise SyntaxError("No valid image orientation was given. Did you\
-                              check spelling?")        
+                              check spelling?")
 
 
 class SlideShowApp(App):
+    """The kivy.app Child starting the construction.
+    """
 
     def build(self):
         root = RootWidget()
