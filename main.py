@@ -57,11 +57,12 @@ class RootWidget(BoxLayout):
         # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
         print(type(touch))
         if self.scheduled_event is not None:
-            print(type(self.scheduled_event))
             self.scheduled_event.cancel()
             self.scheduled_event = None
+
         if touch.is_double_tap:
             self.fullscreen_toggle()
+
         else:
             # 0.5 seems to be the right balance between response time and
             # ability to click fast enough. May differ on touchscreen
@@ -118,6 +119,7 @@ class Picture(Image):
 
         super(Picture, self).__init__(*args, **kwargs)
 
+        self._path2imgs = path2imgs
         # Defines how much time passes between image switch
         self.time_delay = time_delay
 
@@ -125,7 +127,7 @@ class Picture(Image):
         self.__frame_orientation = frame_orientation
 
         # Defines the initial starting image
-        self.imgs = hf.list_img_paths(path2imgs)
+        self.imgs = hf.list_img_paths(self.path2imgs)
         self.source = random.choice(self.imgs)
         self.set_angle()
 
@@ -141,6 +143,18 @@ class Picture(Image):
 
         self.source = random.choice(self.imgs)
         self.set_angle()
+
+    @property
+    def path2imgs(self):
+        return self._path2imgs
+
+    @path2imgs.setter
+    def path2imgs(self, value):
+        self._path2imgs = value
+
+    @path2imgs.deleter
+    def path2imgs(self):
+        del self._path2imgs
 
     def set_angle(self):
         """
