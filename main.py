@@ -6,15 +6,18 @@ kivy.require('2.0.0')
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.properties import NumericProperty
-from kivy.uix.image import Image
+from kivy.factory import Factory
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.image import Image
+from kivy.uix.popup import Popup
 
 
+import configparser as cp
 import os
+from os.path import join, isdir
 import random
-
-import pygame
 
 import helper_func as hf
 
@@ -28,11 +31,22 @@ same menu" type query.
 
 # Automagically sets image to maximum resolution and Window to fullscreen
 Window.fullscreen = 'auto'
+CONFIGFILE = 'settings.conf'
+
+# Configurations
+CONFIG = cp.ConfigParser()
+CONFIG.read(CONFIGFILE)
+FRAME_ORIENTATION = CONFIG['DEFAULT']['orientation']
+# Change this to CONFIG['DEFAULT']['img_dir'] as soon as you
+# develop on raspberry pi
+IMG_DIR = os.getcwd()
+TIME_DELAY = int(CONFIG['DEFAULT']['time_delay'])
 
 
 class RootWidget(BoxLayout):
     """RootWidget is the base Widget of this application.
     """
+
 
     def __init__(self, **kwargs):
         """Constructor method
@@ -40,7 +54,9 @@ class RootWidget(BoxLayout):
 
         super(RootWidget, self).__init__(**kwargs)
 
-        self.picture = Picture(self.time_delay)
+        self.picture = Picture(path2imgs=IMG_DIR,
+                               time_delay=TIME_DELAY,
+                               frame_orientation=FRAME_ORIENTATION)
         self.menu = Menu()
 
         self.add_widget(self.picture)
@@ -219,13 +235,27 @@ class Menu(BoxLayout):
     """Description
     """
 
-    def __init__(self, **kwargs):
+    # Configuration
+    frame_orientation = StringProperty(FRAME_ORIENTATION)
+    img_dir = StringProperty(IMG_DIR)
+    time_delay = NumericProperty(TIME_DELAY)
+
+    # For DirPopup
+    dirdialog = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+    def __init__(self, frame_orientation=FRAME_ORIENTATION,
+                 img_dir=IMG_DIR, time_delay=TIME_DELAY, **kwargs):
         """The constructor method
         """
 
         super(Menu, self).__init__(**kwargs)
+        # DirDialog created in show_dirdialog
+        self.dialog = None
 
-        self.path = os.getcwd()
+    def choose(self):
+        self.img_dir = self.dialog.ids['filechooser'].path
+        self.dismiss_popup()
 
     def close_menu(self):
         """Close the menu and open Picture widget
@@ -233,10 +263,22 @@ class Menu(BoxLayout):
         self.parent.add_widget(self.parent.picture)
         self.parent.remove_widget(self.parent.menu)
 
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def show_dirdialog(self):
+        self.dialog = DirDialog(choice=self.choose, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Choose the directory containing your"
+                            " picture.",
+                            content=self.dialog,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
     def quit_app(self):
         """Quits the app and closes it.
         """
         App.get_running_app().stop()
+
 
 class SpinBox(BoxLayout):
     """Description
@@ -249,6 +291,16 @@ class SpinBox(BoxLayout):
         super(SpinBox, self).__init__(**kwargs)
 
 
+class DirDialog(FloatLayout):
+    """Description
+    """
+    choice = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+
+    def is_dir(self, directory, filename):
+        return isdir(join(directory, filename))
+
+
 class SlideShowApp(App):
     """The kivy.app Child starting the construction.
     """
@@ -257,6 +309,8 @@ class SlideShowApp(App):
         root = RootWidget()
         return root
 
+Factory.register('Menu', cls=Menu)
+Factory.register('DirDialog', cls=DirDialog)
 
 if __name__ == '__main__':
     SlideShowApp().run()
