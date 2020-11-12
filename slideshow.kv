@@ -9,6 +9,71 @@
     canvas.after:
         PopMatrix
 
+<Menu>:
+    orientation: 'vertical'
+    BoxLayout:
+        orientation: 'horizontal'
+        Label:
+            text: 'Orientation'
+        ToggleButton:
+            text: 'Landscape'
+            group: 'orientation'
+        ToggleButton:
+            text: 'Portrait'
+            group: 'orientation'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        Label:
+            text: 'Image Directory'
+        TextInput:
+            text: 'Path to file' #self.path
+        Button:
+            text: 'Open'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        Label:
+            text: 'Time Delay'
+        SpinBox:
+
+    BoxLayout:
+        orientation: 'horizontal'
+        Label:
+            text: 'Fullscreen'
+        Switch:
+        	# Always initially set to true even if windowed
+        	# How let it show the True value?
+        	# KV does not recognise Window.fullscreen...
+            active: True
+            on_active: root.parent.fullscreen_toggle()
+
+    Boxlayout:
+    	Label:
+    	Label:
+    	Button:
+    		text: 'Save'
+
+    Label:
+
+    BoxLayout:
+        orientation: 'horizontal'
+        Button:
+            text: 'Close Menu'
+            on_press: root.close_menu()
+        Label:
+        Button:
+            text: 'Quit Program'
+            on_press: root.quit_app()
+
+<SpinBox>:
+    orientation: 'horizontal'
+    TextInput:
+        text: '3'
+    Button:
+        text: '+'
+    Button:
+        text: '-'
+
 <RootWidget>:
     orientation: 'vertical'
-    Picture:

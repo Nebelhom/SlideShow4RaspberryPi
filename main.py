@@ -32,9 +32,6 @@ Window.fullscreen = 'auto'
 
 class RootWidget(BoxLayout):
     """RootWidget is the base Widget of this application.
-
-    :param scheduled_event: Shows whether an event is scheduled in kivy or not
-    :type scheduled_event: None or kivy.clock.ClockEvent
     """
 
     def __init__(self, **kwargs):
@@ -43,40 +40,10 @@ class RootWidget(BoxLayout):
 
         super(RootWidget, self).__init__(**kwargs)
 
-        self.scheduled_event = None
+        self.picture = Picture(self.time_delay)
+        self.menu = Menu()
 
-    def on_touch_down(self, touch):
-        """Kivy standard function to capture a touch event and to link
-           it to a method
-
-        :param touch: a touch or click event with the screen
-        :type touch: kivy.input.providers.mouse.MouseMotionEvent
-        """
-
-        # Reference:
-        # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
-        print(type(touch))
-        if self.scheduled_event is not None:
-            self.scheduled_event.cancel()
-            self.scheduled_event = None
-
-        if touch.is_double_tap:
-            self.fullscreen_toggle()
-
-        else:
-            # 0.5 seems to be the right balance between response time and
-            # ability to click fast enough. May differ on touchscreen
-            double_tap_wait_s = 0.5
-            self.scheduled_event = Clock.schedule_once(self.single_tap,
-                                                       double_tap_wait_s)
-
-    def single_tap(self, *args):
-        """
-        Placeholder function for when I need a single tap
-        Planned is to open the menu
-        """
-
-        print("Single Tap!")
+        self.add_widget(self.picture)
 
     def fullscreen_toggle(self):
         """Toggles between fullscreen and windowed mode.
@@ -85,7 +52,7 @@ class RootWidget(BoxLayout):
         if Window.fullscreen:
             Window.fullscreen = False
         else:
-            # If set to true, the images will not have optimal resolution
+            # If set to True, the images will not have optimal resolution
             Window.fullscreen = 'auto'
 
 
@@ -96,16 +63,18 @@ class Picture(Image):
     :param angle: The angle of image rotation in relation to the image's exif
                   orientation
     :type angle: int
+    :param imgs: A list of all paths to relevant image files in the chosen
+    image directory
+    :type imgs: list
+    :param scheduled_event: Shows whether an event is scheduled in kivy or not
+    :type scheduled_event: None or kivy.clock.ClockEvent
+    :param source: The path to the currently chosen image
+    :type source: str
     :param time_delay: The time in seconds until the image shown is switched
     :type time_delay: int
     :param __frame_orientation: Defines if the screen is in 'landscape'
         or 'portrait' orientation, defaults to 'landscape'
     :type __frame_orientation: str
-    :param imgs: A list of all paths to relevant image files in the chosen
-        image directory
-    :type imgs: list
-    :param source: The path to the currently chosen image
-    :type source: str
     """
 
     # Without this declaration, the value will not arrive in kv file
@@ -118,6 +87,8 @@ class Picture(Image):
         """
 
         super(Picture, self).__init__(*args, **kwargs)
+
+        self.scheduled_event = None
 
         self._path2imgs = path2imgs
         # Defines how much time passes between image switch
@@ -209,6 +180,73 @@ class Picture(Image):
         else:
             raise SyntaxError("No valid image orientation was given. Did you\
                               check spelling?")
+
+    def on_touch_down(self, touch):
+        """Kivy standard function to capture a touch event and to link
+           it to a method
+
+        :param touch: a touch or click event with the screen
+        :type touch: kivy.input.providers.mouse.MouseMotionEvent
+        """
+
+        # Reference:
+        # https://stackoverflow.com/questions/64741710/python-3-kivy-react-only-to-double-tap-not-single-tap/64743622#64743622
+        if self.scheduled_event is not None:
+            self.scheduled_event.cancel()
+            self.scheduled_event = None
+
+        if touch.is_double_tap:
+            self.parent.fullscreen_toggle()
+
+        else:
+            # 0.5 seems to be the right balance between response time and
+            # ability to click fast enough. May differ on touchscreen
+            double_tap_wait_s = 0.5
+            self.scheduled_event = Clock.schedule_once(self.open_menu,
+                                                       double_tap_wait_s)
+
+    def open_menu(self, *args):
+        """
+        Placeholder function for when I need a single tap
+        Planned is to open the menu
+        """
+
+        self.parent.add_widget(self.parent.menu)
+        self.parent.remove_widget(self.parent.picture)
+
+
+class Menu(BoxLayout):
+    """Description
+    """
+
+    def __init__(self, **kwargs):
+        """The constructor method
+        """
+
+        super(Menu, self).__init__(**kwargs)
+
+        self.path = os.getcwd()
+
+    def close_menu(self):
+        """Close the menu and open Picture widget
+        """
+        self.parent.add_widget(self.parent.picture)
+        self.parent.remove_widget(self.parent.menu)
+
+    def quit_app(self):
+        """Quits the app and closes it.
+        """
+        App.get_running_app().stop()
+
+class SpinBox(BoxLayout):
+    """Description
+    """
+
+    def __init__(self, **kwargs):
+        """The constructor method
+        """
+
+        super(SpinBox, self).__init__(**kwargs)
 
 
 class SlideShowApp(App):
