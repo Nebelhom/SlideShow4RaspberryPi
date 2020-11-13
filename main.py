@@ -12,14 +12,17 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.uix.popup import Popup
+from kivy.uix.textinput import TextInput
+from kivy.uix.togglebutton import ToggleButton
 
-
-import configparser as cp
+import datetime
 import os
 from os.path import join, isdir
 import random
+import re
 
 import helper_func as hf
+import confparser as cp
 
 """
 TODO:
@@ -33,20 +36,12 @@ same menu" type query.
 Window.fullscreen = 'auto'
 CONFIGFILE = 'settings.conf'
 
-# Configurations
-CONFIG = cp.ConfigParser()
-CONFIG.read(CONFIGFILE)
-FRAME_ORIENTATION = CONFIG['DEFAULT']['orientation']
-# Change this to CONFIG['DEFAULT']['img_dir'] as soon as you
-# develop on raspberry pi
-IMG_DIR = os.getcwd()
-TIME_DELAY = int(CONFIG['DEFAULT']['time_delay'])
+CONFIG = cp.Config(configfile=CONFIGFILE)
 
 
 class RootWidget(BoxLayout):
     """RootWidget is the base Widget of this application.
     """
-
 
     def __init__(self, **kwargs):
         """Constructor method
@@ -54,10 +49,12 @@ class RootWidget(BoxLayout):
 
         super(RootWidget, self).__init__(**kwargs)
 
-        self.picture = Picture(path2imgs=IMG_DIR,
-                               time_delay=TIME_DELAY,
-                               frame_orientation=FRAME_ORIENTATION)
-        self.menu = Menu()
+        self.picture = Picture(img_dir=CONFIG.img_dir,
+                               time_delay=CONFIG.time_delay,
+                               frame_orientation=CONFIG.frame_orientation)
+        self.menu = Menu(img_dir=CONFIG.img_dir,
+                         time_delay=CONFIG.time_delay,
+                         frame_orientation=CONFIG.frame_orientation)
 
         self.add_widget(self.picture)
 
@@ -97,7 +94,7 @@ class Picture(Image):
     # called as self.angle in the code below
     angle = NumericProperty(0)
 
-    def __init__(self, path2imgs=os.getcwd(), time_delay=3,
+    def __init__(self, img_dir=os.getcwd(), time_delay=3,
                  frame_orientation='landscape', *args, **kwargs):
         """Constructor method
         """
@@ -106,7 +103,7 @@ class Picture(Image):
 
         self.scheduled_event = None
 
-        self._path2imgs = path2imgs
+        self._img_dir = img_dir
         # Defines how much time passes between image switch
         self.time_delay = time_delay
 
@@ -114,7 +111,7 @@ class Picture(Image):
         self.__frame_orientation = frame_orientation
 
         # Defines the initial starting image
-        self.imgs = hf.list_img_paths(self.path2imgs)
+        self.imgs = hf.list_img_paths(self.img_dir)
         self.source = random.choice(self.imgs)
         self.set_angle()
 
@@ -132,16 +129,16 @@ class Picture(Image):
         self.set_angle()
 
     @property
-    def path2imgs(self):
-        return self._path2imgs
+    def img_dir(self):
+        return self._img_dir
 
-    @path2imgs.setter
-    def path2imgs(self, value):
-        self._path2imgs = value
+    @img_dir.setter
+    def img_dir(self, value):
+        self._img_dir = value
 
-    @path2imgs.deleter
-    def path2imgs(self):
-        del self._path2imgs
+    @img_dir.deleter
+    def img_dir(self):
+        del self._img_dir
 
     def set_angle(self):
         """
@@ -233,19 +230,29 @@ class Picture(Image):
 
 class Menu(BoxLayout):
     """Description
+
+    Still TO DO:
+    - Activate Protrait / Landscape Switch --> TODO
+    - Save method with feedback in a label --> Still need to save to settings.conf
+    - time_delay: Add in seconds to label and change it in Picture --> Label change, needs to effect in Picture
+    - If there are changes and save is not pressed, last check and ask in
+    Pop-up
     """
 
     # Configuration
-    frame_orientation = StringProperty(FRAME_ORIENTATION)
-    img_dir = StringProperty(IMG_DIR)
-    time_delay = NumericProperty(TIME_DELAY)
+    frame_orientation = StringProperty(CONFIG.frame_orientation)
+    img_dir = StringProperty(CONFIG.img_dir)
+    time_delay = NumericProperty(CONFIG.time_delay)
 
     # For DirPopup
     dirdialog = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-    def __init__(self, frame_orientation=FRAME_ORIENTATION,
-                 img_dir=IMG_DIR, time_delay=TIME_DELAY, **kwargs):
+    # Widget Values
+    save_label = StringProperty('')
+
+    def __init__(self, frame_orientation=frame_orientation,
+                 img_dir=img_dir, time_delay=time_delay, **kwargs):
         """The constructor method
         """
 
@@ -260,16 +267,54 @@ class Menu(BoxLayout):
     def close_menu(self):
         """Close the menu and open Picture widget
         """
+        self.parent.picture = Picture(img_dir=CONFIG.img_dir,
+                                      time_delay=CONFIG.time_delay,
+                                      frame_orientation=CONFIG.frame_orientation)
         self.parent.add_widget(self.parent.picture)
         self.parent.remove_widget(self.parent.menu)
 
     def dismiss_popup(self):
         self._popup.dismiss()
 
+    def save_settings(self):
+        """Saves the settings of the config file.
+
+        Reference:
+        https://stackoverflow.com/questions/30202801/how-to-access-id-widget-of-different-class-from-a-kivy-file-kv
+
+        TODO:
+        * Get all necessary values (orientation timedelay img_path)  DONE
+        * Give a message to label saying saved  DONE
+        * Write to config_file calling configparser method --> TODO Does not work yet!
+        """
+
+        # Reference:
+        # https://stackoverflow.com/questions/31763187/is-there-builtin-way-to-get-a-togglebutton-groups-current-selection
+        current = [t for t in ToggleButton.get_widgets('orientation')
+                   if t.state == 'down'][0]
+        CONFIG.frame_orientation = current.text
+
+        # Image Directory
+        CONFIG.img_dir = self.ids.img_dir_text.text
+
+        # Reference:
+        # https://stackoverflow.com/questions/30202801/how-to-access-id-widget-of-different-class-from-a-kivy-file-kv
+        CONFIG.time_delay = self.ids.td_spin.output.text
+
+        # Save all values to file
+        CONFIG.write(CONFIGFILE)
+        print(CONFIG.time_delay)
+
+
+        now = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        self.save_label = f"Current configuration saved to '{CONFIGFILE}' at {now}."
+
+
     def show_dirdialog(self):
         self.dialog = DirDialog(choice=self.choose, cancel=self.dismiss_popup)
         self._popup = Popup(title="Choose the directory containing your"
-                            " picture.",
+                            " picture. Enter the directory you wish to choose"
+                            " before confirming.",
                             content=self.dialog,
                             size_hint=(0.9, 0.9))
         self._popup.open()
@@ -283,12 +328,43 @@ class Menu(BoxLayout):
 class SpinBox(BoxLayout):
     """Description
     """
+    text_value = StringProperty('')
+    output = ObjectProperty(None)
 
-    def __init__(self, **kwargs):
+    def __init__(self, text_value=CONFIG.time_delay, **kwargs):
         """The constructor method
         """
 
         super(SpinBox, self).__init__(**kwargs)
+        self.text_value = str(text_value)
+
+    def plus(self):
+        """Adds +1 to a number in string format
+        """
+        newval = int(self.text_value) + 1
+        self.text_value = str(newval)
+
+    def minus(self):
+        """Subtracts 1 from a number in string format
+        """
+        newval = int(self.text_value) - 1
+        if newval >= 1:
+            self.text_value = str(newval)
+        else:
+            self.text_value = '1'
+
+
+class PosIntInput(TextInput):
+    """Allows only positive integer values to be inserted
+
+    Reference:
+    https://kivy.org/doc/stable/api-kivy.uix.textinput.html
+    """
+    pat = re.compile('[^0-9]')
+
+    def insert_text(self, substring, from_undo=False):
+        s = re.sub(self.pat, '', substring)
+        return super(PosIntInput, self).insert_text(s, from_undo=from_undo)
 
 
 class DirDialog(FloatLayout):
@@ -308,6 +384,7 @@ class SlideShowApp(App):
     def build(self):
         root = RootWidget()
         return root
+
 
 Factory.register('Menu', cls=Menu)
 Factory.register('DirDialog', cls=DirDialog)

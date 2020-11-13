@@ -1,5 +1,8 @@
 #:kivy 2.0.0
 
+#:import Factory kivy.factory.Factory
+#:import Window kivy.core.window.Window
+
 <Picture>:
     canvas.before:
         PushMatrix
@@ -11,6 +14,7 @@
 
 <Menu>:
     orientation: 'vertical'
+
     BoxLayout:
         orientation: 'horizontal'
         Label:
@@ -18,41 +22,47 @@
         ToggleButton:
             text: 'Landscape'
             group: 'orientation'
+            state: 'down' if root.frame_orientation == 'landscape' else 'normal'
         ToggleButton:
             text: 'Portrait'
             group: 'orientation'
+            state: 'down' if root.frame_orientation == 'portrait' else 'normal'
 
     BoxLayout:
         orientation: 'horizontal'
         Label:
             text: 'Image Directory'
         TextInput:
-            text: 'Path to file' #self.path
+            id: img_dir_text
+            text: root.img_dir
         Button:
             text: 'Open'
+            on_release: root.show_dirdialog()
 
     BoxLayout:
         orientation: 'horizontal'
         Label:
-            text: 'Time Delay'
+            text: 'Time Delay (in seconds)'
         SpinBox:
+            id: td_spin
 
     BoxLayout:
         orientation: 'horizontal'
         Label:
             text: 'Fullscreen'
         Switch:
-        	# Always initially set to true even if windowed
-        	# How let it show the True value?
-        	# KV does not recognise Window.fullscreen...
-            active: True
-            on_active: root.parent.fullscreen_toggle()
+            active: True if (Window.fullscreen == 'auto' or Window.fullscreen) else False
+            # on_touch_up: root.parent.fullscreen_toggle()
 
-    Boxlayout:
+    BoxLayout:
     	Label:
     	Label:
+            id: save_lbl
+            text: root.save_label
     	Button:
     		text: 'Save'
+            on_press: root.save_settings()
+
 
     Label:
 
@@ -68,12 +78,43 @@
 
 <SpinBox>:
     orientation: 'horizontal'
-    TextInput:
-        text: '3'
+    # ObjectProperty in py file
+    # Needed to access PosIntInput from <Menu>
+    output: pii
+    PosIntInput:
+        id: pii
+        text: root.text_value
     Button:
         text: '+'
+        on_press: root.plus()
     Button:
         text: '-'
+        on_press: root.minus()
+
+<PosIntInput>:
+
+<DirDialog>:
+	BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserIconView:
+            id: filechooser
+            # This allows choosing a directory
+            dirselect: True
+            filters: [root.is_dir]
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Choose"
+                on_release: root.choice()
+
 
 <RootWidget>:
     orientation: 'vertical'
