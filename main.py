@@ -15,14 +15,12 @@ from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.togglebutton import ToggleButton
 
-import datetime
 import os
 from os.path import join, isdir
 import random
 import re
 
 import helper_func as hf
-#import confparser as cp
 import configparser as cp
 
 """
@@ -309,11 +307,6 @@ class Menu(BoxLayout):
         # Save all values to file
         with open(CONFIGFILE, 'w') as configfile:
             CONFIG.write(configfile)
-
-        # Give notification that it has been saved
-        now = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        self.save_label = f"Current configuration saved to '{CONFIGFILE}'"\
-                          f" at {now}."
 
 
     def show_dirdialog(self):

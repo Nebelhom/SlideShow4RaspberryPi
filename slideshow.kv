@@ -46,30 +46,12 @@
         SpinBox:
             id: td_spin
 
-    BoxLayout:
-        orientation: 'horizontal'
-        Label:
-            text: 'Fullscreen'
-        Switch:
-            active: True if (Window.fullscreen == 'auto' or Window.fullscreen) else False
-            # on_touch_up: root.parent.fullscreen_toggle()
-
-    BoxLayout:
-    	Label:
-    	Label:
-            id: save_lbl
-            text: root.save_label
-    	Button:
-    		text: 'Save'
-            on_press: root.save_settings()
-
-
     Label:
 
     BoxLayout:
         orientation: 'horizontal'
         Button:
-            text: 'Close Menu'
+            text: 'Save & Close Menu'
             on_press: root.close_menu()
         Label:
         Button:
