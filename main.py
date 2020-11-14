@@ -22,7 +22,8 @@ import random
 import re
 
 import helper_func as hf
-import confparser as cp
+#import confparser as cp
+import configparser as cp
 
 """
 TODO:
@@ -36,7 +37,18 @@ same menu" type query.
 Window.fullscreen = 'auto'
 CONFIGFILE = 'settings.conf'
 
-CONFIG = cp.Config(configfile=CONFIGFILE)
+CONFIG = cp.ConfigParser()
+CONFIG.read(CONFIGFILE)
+
+# Configuration
+FRAME_ORIENTATION = CONFIG['SLIDESHOW']['frame_orientation']
+
+if isdir(CONFIG['SLIDESHOW']['img_dir']):
+    IMG_DIR = CONFIG['SLIDESHOW']['img_dir']
+else:
+    IMG_DIR = os.getcwd()
+
+TIME_DELAY = CONFIG['SLIDESHOW']['time_delay']
 
 
 class RootWidget(BoxLayout):
@@ -49,12 +61,12 @@ class RootWidget(BoxLayout):
 
         super(RootWidget, self).__init__(**kwargs)
 
-        self.picture = Picture(img_dir=CONFIG.img_dir,
-                               time_delay=CONFIG.time_delay,
-                               frame_orientation=CONFIG.frame_orientation)
-        self.menu = Menu(img_dir=CONFIG.img_dir,
-                         time_delay=CONFIG.time_delay,
-                         frame_orientation=CONFIG.frame_orientation)
+        self.picture = Picture(img_dir=IMG_DIR,
+                               time_delay=TIME_DELAY,
+                               frame_orientation=FRAME_ORIENTATION)
+        self.menu = Menu(img_dir=IMG_DIR,
+                         time_delay=TIME_DELAY,
+                         frame_orientation=FRAME_ORIENTATION)
 
         self.add_widget(self.picture)
 
@@ -105,7 +117,7 @@ class Picture(Image):
 
         self._img_dir = img_dir
         # Defines how much time passes between image switch
-        self.time_delay = time_delay
+        self.time_delay = int(time_delay)
 
         # Defines if the screen sits in landscape or portrait
         self.__frame_orientation = frame_orientation
@@ -230,19 +242,12 @@ class Picture(Image):
 
 class Menu(BoxLayout):
     """Description
-
-    Still TO DO:
-    - Activate Protrait / Landscape Switch --> TODO
-    - Save method with feedback in a label --> Still need to save to settings.conf
-    - time_delay: Add in seconds to label and change it in Picture --> Label change, needs to effect in Picture
-    - If there are changes and save is not pressed, last check and ask in
-    Pop-up
     """
 
     # Configuration
-    frame_orientation = StringProperty(CONFIG.frame_orientation)
-    img_dir = StringProperty(CONFIG.img_dir)
-    time_delay = NumericProperty(CONFIG.time_delay)
+    frame_orientation = StringProperty(FRAME_ORIENTATION)
+    img_dir = StringProperty(IMG_DIR)
+    time_delay = NumericProperty(TIME_DELAY)
 
     # For DirPopup
     dirdialog = ObjectProperty(None)
@@ -267,9 +272,10 @@ class Menu(BoxLayout):
     def close_menu(self):
         """Close the menu and open Picture widget
         """
-        self.parent.picture = Picture(img_dir=CONFIG.img_dir,
-                                      time_delay=CONFIG.time_delay,
-                                      frame_orientation=CONFIG.frame_orientation)
+        self.save_settings()
+        self.parent.picture = Picture(img_dir=IMG_DIR,
+                                      time_delay=TIME_DELAY,
+                                      frame_orientation=FRAME_ORIENTATION)
         self.parent.add_widget(self.parent.picture)
         self.parent.remove_widget(self.parent.menu)
 
@@ -278,36 +284,36 @@ class Menu(BoxLayout):
 
     def save_settings(self):
         """Saves the settings of the config file.
-
-        Reference:
-        https://stackoverflow.com/questions/30202801/how-to-access-id-widget-of-different-class-from-a-kivy-file-kv
-
-        TODO:
-        * Get all necessary values (orientation timedelay img_path)  DONE
-        * Give a message to label saying saved  DONE
-        * Write to config_file calling configparser method --> TODO Does not work yet!
         """
 
         # Reference:
         # https://stackoverflow.com/questions/31763187/is-there-builtin-way-to-get-a-togglebutton-groups-current-selection
         current = [t for t in ToggleButton.get_widgets('orientation')
-                   if t.state == 'down'][0]
-        CONFIG.frame_orientation = current.text
+                   if t.state == 'down'][0].text.lower()
+        global FRAME_ORIENTATION
+        FRAME_ORIENTATION = current
+        CONFIG['SLIDESHOW']['frame_orientation'] = current
 
         # Image Directory
-        CONFIG.img_dir = self.ids.img_dir_text.text
+        global IMG_DIR
+        IMG_DIR = self.ids.img_dir_text.text
+        CONFIG['SLIDESHOW']['img_dir'] = self.ids.img_dir_text.text
 
+        # Time Delay
         # Reference:
         # https://stackoverflow.com/questions/30202801/how-to-access-id-widget-of-different-class-from-a-kivy-file-kv
-        CONFIG.time_delay = self.ids.td_spin.output.text
+        global TIME_DELAY
+        TIME_DELAY = self.ids.td_spin.output.text
+        CONFIG['SLIDESHOW']['time_delay'] = self.ids.td_spin.output.text
 
         # Save all values to file
-        CONFIG.write(CONFIGFILE)
-        print(CONFIG.time_delay)
+        with open(CONFIGFILE, 'w') as configfile:
+            CONFIG.write(configfile)
 
-
+        # Give notification that it has been saved
         now = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        self.save_label = f"Current configuration saved to '{CONFIGFILE}' at {now}."
+        self.save_label = f"Current configuration saved to '{CONFIGFILE}'"\
+                          f" at {now}."
 
 
     def show_dirdialog(self):
@@ -331,7 +337,7 @@ class SpinBox(BoxLayout):
     text_value = StringProperty('')
     output = ObjectProperty(None)
 
-    def __init__(self, text_value=CONFIG.time_delay, **kwargs):
+    def __init__(self, text_value=TIME_DELAY, **kwargs):
         """The constructor method
         """
 
