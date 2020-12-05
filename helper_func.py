@@ -134,13 +134,17 @@ def get_img_orientation(fname):
     :rtype: int
     """
 
-    with Image.open(fname) as img:
-        exif = {
-            TAGS[k]: v
-            for k, v in img._getexif().items()
-            if k in TAGS
-        }
-    return exif["Orientation"]
+    try:
+        with Image.open(fname) as img:
+            exif = {
+                TAGS[k]: v
+                for k, v in img._getexif().items()
+                if k in TAGS
+            }
+        return exif["Orientation"]
+    except AttributeError:
+        print("No exif tags found. Using standard landscape orientation...")
+        return 6
 
 def get_img_size(fname):
     """Returns image size of an image using the Pillow library
