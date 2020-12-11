@@ -165,5 +165,5 @@ if __name__ == "__main__":
     #print("\n\n#############################\n\n")
     #get_img_orientation("20200511_184914.jpg")
     #print("Landscape: ", get_img_orientation("20190330_134242.jpg"))
-    print("Portrait: ", type(get_img_orientation("20200511_184914.jpg")))
+    print("Portrait: ", type(get_img_orientation("20191004_183410.jpg")))
     #print("Image size ", get_img_size("20200511_184914.jpg"))
