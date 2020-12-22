@@ -169,9 +169,8 @@ class Picture(Image):
 
         Reference:
         https://www.daveperrett.com/articles/2012/07/28/exif-orientation-handling-is-a-ghetto/
-
-
         """
+
         o = hf.get_img_orientation(self.source)
         if self.__frame_orientation == "landscape":
             # This is landscape orientation
@@ -229,9 +228,7 @@ class Picture(Image):
                                                        double_tap_wait_s)
 
     def open_menu(self, *args):
-        """
-        Placeholder function for when I need a single tap
-        Planned is to open the menu
+        """On single tap, opens Menu Class to set configurations.
         """
 
         self.parent.add_widget(self.parent.menu)
@@ -239,7 +236,8 @@ class Picture(Image):
 
 
 class Menu(BoxLayout):
-    """Description
+    """Class that is called when entering the Menu by a single tap from Picture
+    class.
     """
 
     # Configuration
@@ -278,6 +276,8 @@ class Menu(BoxLayout):
         self.parent.remove_widget(self.parent.menu)
 
     def dismiss_popup(self):
+        """Closes the popup.
+        """
         self._popup.dismiss()
 
     def save_settings(self):
@@ -310,6 +310,9 @@ class Menu(BoxLayout):
 
 
     def show_dirdialog(self):
+        """Opens a DirDialog class allowing the user to choose a directory.
+        """
+
         self.dialog = DirDialog(choice=self.choose, cancel=self.dismiss_popup)
         self._popup = Popup(title="Choose the directory containing your"
                             " picture. Enter the directory you wish to choose"
@@ -321,12 +324,17 @@ class Menu(BoxLayout):
     def quit_app(self):
         """Quits the app and closes it.
         """
+        
         App.get_running_app().stop()
 
 
 class SpinBox(BoxLayout):
-    """Description
+    """Class allowing a text box filled only with numbers to add +1 or subtract
+    minus 1 from the value in the text box.
+    
+    This class is linked to PosIntInput Class.
     """
+    
     text_value = StringProperty('')
     output = ObjectProperty(None)
 
@@ -367,7 +375,8 @@ class PosIntInput(TextInput):
 
 
 class DirDialog(FloatLayout):
-    """Description
+    """Dialog Box allowing the user to choose a specific directory where the
+    images are saved.
     """
     choice = ObjectProperty(None)
     cancel = ObjectProperty(None)
