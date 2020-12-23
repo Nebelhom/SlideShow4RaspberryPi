@@ -1,4 +1,13 @@
-import setuptools
+import os
+
+from setuptools import setup
+
+THIS_DIR = os.path.dirname(os.path.realpath(__name__))
+
+
+def read(*parts):
+    with open(os.path.join(THIS_DIR, *parts)) as f:
+        return f.read()
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -12,7 +21,8 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Nebelhom/SlideShow4RaspberryPi",
-    packages=setuptools.find_packages(),
+    packages=['slideshow'],
+    install_requires=read('requirements.txt').splitlines(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
