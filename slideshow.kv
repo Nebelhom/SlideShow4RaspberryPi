@@ -20,10 +20,12 @@
         Label:
             text: 'Orientation'
         ToggleButton:
+            id: landscape
             text: 'Landscape'
             group: 'orientation'
             state: 'down' if root.frame_orientation == 'landscape' else 'normal'
         ToggleButton:
+            id: portrait
             text: 'Portrait'
             group: 'orientation'
             state: 'down' if root.frame_orientation == 'portrait' else 'normal'
@@ -49,11 +51,18 @@
     Label:
 
     BoxLayout:
+        Button:
+            text: 'Save & Return'
+            on_press: root.close_menu(True)
+        Label:
+        Button:
+            text: 'Return without Saving'
+            on_press: root.close_menu(False)
         Label:
         Button:
             text: 'Quit Program'
             on_press: root.quit_app()
-        Label:
+        
 
 <SpinBox>:
     orientation: 'horizontal'
