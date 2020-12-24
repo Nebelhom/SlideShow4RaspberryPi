@@ -1,4 +1,4 @@
-#!usr/bin/env python
+#!/usr/bin/env python
 
 """
 Basic Image Slideshow for use on a raspberry Pi as a digital picture 
