@@ -7,7 +7,8 @@ from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.factory import Factory
-from kivy.properties import NumericProperty, ObjectProperty, StringProperty
+from kivy.properties import (BooleanProperty, NumericProperty, ObjectProperty,
+StringProperty)
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
@@ -23,13 +24,6 @@ import re
 import helper_func as hf
 import configparser as cp
 
-"""
-TODO:
-RootWidget should be able to house both a menu and the slideshow.
-
-Take into account and search for it "How to have Menu and Game in the
-same menu" type query.
-"""
 
 # Automagically sets image to maximum resolution and Window to fullscreen
 Window.fullscreen = 'auto'
@@ -66,7 +60,7 @@ class RootWidget(BoxLayout):
                          time_delay=TIME_DELAY,
                          frame_orientation=FRAME_ORIENTATION)
 
-        self.add_widget(self.picture)
+        self.add_widget(self.menu)
 
     def fullscreen_toggle(self):
         """Toggles between fullscreen and windowed mode.
@@ -265,10 +259,25 @@ class Menu(BoxLayout):
         self.img_dir = self.dialog.ids['filechooser'].path
         self.dismiss_popup()
 
-    def close_menu(self):
+    def close_menu(self, *args):
         """Close the menu and open Picture widget
+        
+        :param args: list with only one Boolean parameter to pass from kv to
+        py script to trigger self.save_settings() or not
+        :type args: list
         """
-        self.save_settings()
+        if args[0]:
+            self.save_settings()
+        else:
+            if FRAME_ORIENTATION == "landscape":
+                self.ids["landscape"].state = "down"
+                self.ids["portrait"].state = "normal"
+            else:
+                self.ids["landscape"].state = "normal"
+                self.ids["portrait"].state = "down"
+            self.ids["img_dir_text"].text = IMG_DIR
+            self.ids["td_spin"].text_value = TIME_DELAY
+
         self.parent.picture = Picture(img_dir=IMG_DIR,
                                       time_delay=TIME_DELAY,
                                       frame_orientation=FRAME_ORIENTATION)
