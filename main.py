@@ -102,7 +102,7 @@ def cli(argv=None):
     kwargs = parse_arguments(argv or sys.argv[1:])
     save_settings_externally(kwargs)
     
-    slideshow = SlideShowApp()
+    slideshow = SlideShowApp(kwargs['menu_start'])
     slideshow.run()
     slideshow.root.menu.update_vars()
 

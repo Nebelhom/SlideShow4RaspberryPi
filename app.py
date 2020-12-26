@@ -48,7 +48,7 @@ class RootWidget(BoxLayout):
     """RootWidget is the base Widget of this application.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, menu_start=False, **kwargs):
         """Constructor method
         """
 
@@ -61,8 +61,10 @@ class RootWidget(BoxLayout):
                          time_delay=TIME_DELAY,
                          frame_orientation=FRAME_ORIENTATION)
 
-        #self.add_widget(self.menu)
-        self.add_widget(self.picture)
+        if menu_start:
+            self.add_widget(self.menu)
+        else:
+            self.add_widget(self.picture)
 
     def fullscreen_toggle(self):
         """Toggles between fullscreen and windowed mode.
@@ -417,9 +419,12 @@ class DirDialog(FloatLayout):
 class SlideShowApp(App):
     """The kivy.app Child starting the construction.
     """
+    def __init__(self, menu_start=False, *args, **kwargs):
+        super(SlideShowApp, self).__init__(*args, **kwargs)
+        self.menu_start = menu_start
 
     def build(self):
-        root = RootWidget()
+        root = RootWidget(menu_start=self.menu_start)
         return root
 
 
