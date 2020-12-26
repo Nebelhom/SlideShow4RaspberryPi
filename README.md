@@ -6,6 +6,7 @@ a basic slideshow using the [Kivy library (Version 2.0.0)](https://www.kivy.org)
 on [Raspberry OS](https://www.raspberrypi.org/software/).
 
 Version: 1.0
+
 Author: Johannes Vogel (Nebelhom)
 
 ## Installation
