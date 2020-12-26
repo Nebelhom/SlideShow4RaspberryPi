@@ -1,9 +1,11 @@
 # Slideshow for Raspberry Pi
+*Document last updated on 26.12.2020*
 
 Slideshow is a package written in [Python3](https://www.python.org/) that shows
 a basic slideshow using the [Kivy library (Version 2.0.0)](https://www.kivy.org)
 on [Raspberry OS](https://www.raspberrypi.org/software/).
 
+Version: 1.0
 Author: Johannes Vogel (Nebelhom)
 
 ## Installation
