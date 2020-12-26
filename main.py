@@ -5,14 +5,6 @@ Basic Image Slideshow for use on a raspberry Pi as a digital picture
 frame (version {}).
 """
 
-# Fix this...
-#[ERROR  ] [Core        ] option -t not recognized
-#Kivy Usage: main.py [OPTION...]::
-
-#            Set KIVY_NO_ARGS=1 in your environment or before you import Kivy to
-#            disable Kivy's argument parser.
-
-
 import argparse
 import configparser as cp
 import os
@@ -43,8 +35,15 @@ def save_settings_externally(configs, configfile=CONFIGFILE):
 
 	config['SLIDESHOW']['frame_orientation'] = configs['frame_orientation']
 	config['SLIDESHOW']['img_dir'] = configs['img_dir']
-	config['SLIDESHOW']['time_delay'] = configs['time_delay']
-
+	config['SLIDESHOW']['time_delay'] = str(configs['time_delay'])
+	
+	global FRAME_ORIENTATION
+	FRAME_ORIENTATION = configs['frame_orientation']
+	global IMG_DIR
+	IMG_DIR = configs['img_dir']
+	global TIME_DELAY
+	TIME_DELAY = configs['time_delay']
+	
 	# Save all values to file
 	with open(configfile, 'w') as conf:
 		config.write(conf)
@@ -101,13 +100,11 @@ def parse_arguments(argv):
 def cli(argv=None):
     """CLI entry point."""
     kwargs = parse_arguments(argv or sys.argv[1:])
-    
     save_settings_externally(kwargs)
     
     slideshow = SlideShowApp()
     slideshow.run()
-    
-
+    slideshow.root.menu.update_vars()
 
 if __name__ == "__main__":
 	

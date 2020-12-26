@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+import os
+os.environ['KIVY_NO_ARGS'] = '1'
+from os.path import join, isdir
+import random
+import re
+
+import helper_func as hf
+import configparser as cp
+
 import kivy
 kivy.require('2.0.0')
 
@@ -16,18 +25,10 @@ from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
 from kivy.uix.togglebutton import ToggleButton
 
-import os
-from os.path import join, isdir
-import random
-import re
-
-import helper_func as hf
-import configparser as cp
-
-
 # Automagically sets image to maximum resolution and Window to fullscreen
 Window.fullscreen = 'auto'
 CONFIGFILE = 'settings.conf'
+
 
 CONFIG = cp.ConfigParser()
 CONFIG.read(CONFIGFILE)
@@ -60,7 +61,8 @@ class RootWidget(BoxLayout):
                          time_delay=TIME_DELAY,
                          frame_orientation=FRAME_ORIENTATION)
 
-        self.add_widget(self.menu)
+        #self.add_widget(self.menu)
+        self.add_widget(self.picture)
 
     def fullscreen_toggle(self):
         """Toggles between fullscreen and windowed mode.
@@ -98,8 +100,7 @@ class Picture(Image):
     # called as self.angle in the code below
     angle = NumericProperty(0)
 
-    def __init__(self, img_dir=os.getcwd(), time_delay=3,
-                 frame_orientation='landscape', *args, **kwargs):
+    def __init__(self, img_dir, time_delay, frame_orientation, *args, **kwargs):
         """Constructor method
         """
 
@@ -235,25 +236,28 @@ class Menu(BoxLayout):
     """
 
     # Configuration
-    frame_orientation = StringProperty(FRAME_ORIENTATION)
-    img_dir = StringProperty(IMG_DIR)
-    time_delay = NumericProperty(TIME_DELAY)
+    frame_orientation = StringProperty('')
+    img_dir = StringProperty('')
+    time_delay = NumericProperty(0)
 
     # For DirPopup
     dirdialog = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-    # Widget Values
-    save_label = StringProperty('')
 
-    def __init__(self, frame_orientation=frame_orientation,
-                 img_dir=img_dir, time_delay=time_delay, **kwargs):
+    #def __init__(self, frame_orientation=frame_orientation,
+    #             img_dir=img_dir, time_delay=time_delay, **kwargs):
+    def __init__(self, frame_orientation, img_dir, time_delay, **kwargs):
         """The constructor method
         """
 
         super(Menu, self).__init__(**kwargs)
         # DirDialog created in show_dirdialog
         self.dialog = None
+        
+        self.frame_orientation = frame_orientation
+        self.img_dir = img_dir
+        self.time_delay = time_delay
 
     def choose(self):
         self.img_dir = self.dialog.ids['filechooser'].path
@@ -315,7 +319,7 @@ class Menu(BoxLayout):
 
         # Save all values to file
         with open(CONFIGFILE, 'w') as configfile:
-            CONFIG.write(configfile)
+            CONFIG.write(configfile)    
 
 
     def show_dirdialog(self):
@@ -335,6 +339,22 @@ class Menu(BoxLayout):
         """
         
         App.get_running_app().stop()
+
+    def update_vars(self):
+        """Updates all the properties based on global vars.
+        """
+        self.frame_orientation = FRAME_ORIENTATION
+        self.img_dir = IMG_DIR
+        self.time_delay = TIME_DELAY
+        
+        if FRAME_ORIENTATION == "landscape":
+            self.ids["landscape"].state = "down"
+            self.ids["portrait"].state = "normal"
+        else:
+            self.ids["landscape"].state = "normal"
+            self.ids["portrait"].state = "down"
+        self.ids.img_dir_text.text = IMG_DIR
+        self.ids.td_spin.output.text = TIME_DELAY
 
 
 class SpinBox(BoxLayout):
